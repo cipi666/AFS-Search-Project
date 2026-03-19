@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agentic Flow Steering and Parallel Rollout Search for Spatially Grounded Text-to-Image Generation</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <style>
+    body {
+      font-family: 'Noto Sans', sans-serif;
+    }
+
+    .title.is-2 {
+      font-family: 'Google Sans', sans-serif;
+      font-weight: 700;
+    }
+
+    .author-block {
+      display: inline-block;
+      margin-right: 15px;
+      font-size: 1.2rem;
+    }
+
+    .publication-links {
+      margin-top: 20px;
+    }
+
+    .hero-body {
+      padding-bottom: 2rem;
+    }
+
+    .section {
+      padding-top: 3rem;
+      padding-bottom: 3rem;
+    }
+
+    .abstract-text {
+      text-align: justify;
+      font-size: 1.1rem;
+      line-height: 1.6;
+    }
+  /* 优化作者块布局 */
+  .publication-authors {
+    margin-top: 1.5rem;
+  }
+  .author-block {
+    font-size: 1.25rem;
+    white-space: nowrap;
+  }
+  .author-block a {
+    color: #3273dc;
+    transition: color 0.3s;
+  }
+  .author-block a:hover {
+    color: #000;
+  }
+  
+  /* 优化研究机构和邮箱 */
+  .is-size-5.publication-authors {
+    font-size: 1.15rem !important;
+    margin-bottom: 0.5rem;
+  }
+  .email-link {
+    font-size: 0.95rem;
+    color: #555;
+    margin: 0 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .email-link:hover {
+    color: #3273dc;
+  }
+  .email-container {
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+</style>
+</head>
+
+<body>
+
+  <section class="hero">
+    <div class="hero-body">
+      <div class="container is-max-desktop">
+        <div class="columns is-centered">
+          <div class="column has-text-centered">
+            <h1 class="title is-1 publication-title">Agentic Flow Steering and Parallel Rollout Search for Spatially
+              Grounded Text-to-Image Generation</h1>
+            <h2 class="subtitle is-4"></h2>
+
+            <div class="is-size-6 publication-authors">
+              <span class="author-block">
+                <a href="#">Ping Chen</a><sup>1</sup>,
+              </span>
+              <span class="author-block">
+                <a href="#">Daoxuan Zhang</a><sup>1</sup>,
+              </span>
+              <span class="author-block">
+                <a href="#">Xiangming Wang</a><sup>1</sup>,
+              </span>
+              <span class="author-block">
+                <a href="#">Yungeng Liu</a><sup>1</sup>,
+              </span>
+              <span class="author-block">
+                <a href="#">Haijin Zeng</a><sup>1</sup>,
+              </span>
+              <span class="author-block">
+                <a href="#">Yongyong Chen</a><sup>1</sup>
+              </span>
+            </div>
+
+            <div class="is-size-5 publication-authors">
+              <span class="author-block"><sup>1</sup>Harbin Institute of Technology, Shenzhen, China</span>
+            </div>
+
+            <div class="email-container">
+              <a class="email-link" href="mailto:18924177698@163.com">
+                <i class="fas fa-envelope"></i> 18924177698@163.com
+              </a>
+              <a class="email-link" href="mailto:zenghj@hit.edu.cn">
+                <i class="fas fa-envelope"></i> zenghj@hit.edu.cn
+              </a>
+              <a class="email-link" href="mailto:cyy2020@hit.edu.cn">
+                <i class="fas fa-envelope"></i> cyy2020@hit.edu.cn
+              </a>
+              </div>
+
+            <div class="column has-text-centered">
+              <div class="publication-links">
+                <span class="link-block">
+                  <a href="#" class="button is-dark is-rounded is-outlined">
+                    <span class="icon"><i class="fas fa-file-pdf"></i></span>
+                    <span>Paper (Coming Soon)</span>
+                  </a>
+                </span>
+                <span class="link-block">
+                  <a href="https://github.com/cipi666/AFS-Search" class="button is-dark is-rounded is-outlined">
+                    <span class="icon"><i class="fab fa-github"></i></span>
+                    <span>Code (Coming Soon)</span>
+                  </a>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column is-full">
+          <h2 class="title is-3 has-text-centered">Gallery: High-Fidelity Generation Results</h2>
+          <p class="has-text-centered" style="margin-bottom: 3rem;">
+            Stunning visual results, demonstrating the exceptional prompt adherence, complex semantics, and aesthetic
+            quality achieved by AFS-Search.
+          </p>
+
+          <div class="columns is-multiline is-centered">
+            <div class="column is-full" style="margin-bottom: 30px;">
+              <img src="static/images/show_01.png" alt="Supplementary Result 1" width="100%"
+                style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+            </div>
+            <div class="column is-full" style="margin-bottom: 30px;">
+              <img src="static/images/show2_01.png" alt="Supplementary Result 2" width="100%"
+                style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+            </div>
+            <div class="column is-full">
+              <img src="static/images/show3_01.png" alt="Supplementary Result 3" width="100%"
+                style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+            </div>
+            <div class="column is-full">
+              <img src="static/images/motivation_01.png" alt="AFS-Search Show" width="100%"
+                style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+            </div>
+          </div>
+
+          <p class="has-text-centered is-size-7 has-text-grey" style="margin-top: 20px;">
+            <em>From a visual perspective, <strong>AFS-Search</strong> provides a closed-loop generation paradigm to
+              achieve precise spatial grounding generation, outperforming open-loop baselines like FLUX-dev.</em>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- <section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-full">
+        <img src="static/images/motivation_01.png" alt="AFS-Search Show" width="100%">
+        <h2 class="subtitle has-text-centered" style="margin-top: 15px;">
+          From a visual perspective, <strong>AFS-Search</strong> provides a closed-loop generation paradigm to achieve precise spatial grounding generation, outperforming open-loop baselines like FLUX-dev.
+        </h2>
+      </div>
+    </div>
+  </div>
+</section> -->
+
+  <section class="section has-background-light">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3">Abstract</h2>
+          <div class="content abstract-text">
+            <p>
+              Precise Text-to-Image (T2I) generation has achieved great success but is hindered by the limited
+              relational reasoning of static text encoders and the error accumulation in open-loop sampling. Without
+              real-time feedback, initial semantic ambiguities during the Ordinary Differential Equation trajectory
+              inevitably escalate into stochastic deviations from spatial constraints. To bridge this gap, we introduce
+              AFS-Search (<strong>A</strong>gentic <strong>F</strong>low <strong>S</strong>teering and Parallel Rollout
+              <strong>Search</strong>), a training-free closed-loop framework built upon FLUX.1-dev. AFS-Search
+              incorporates a training-free closed-loop parallel rollout search and flow steering mechanism, which
+              leverages a Vision-Language Model (VLM) as a semantic critic to diagnose intermediate latents and
+              dynamically steer the velocity field via precise spatial grounding. Complementarily, we formulate T2I
+              generation as a sequential decision-making process, exploring multiple trajectories through lookahead
+              simulations and selecting the optimal path based on VLM-guided rewards. Further, we provide AFS-Search-Pro
+              for higher performance and AFS-Search-Fast for quicker generation. Experimental results show that our
+              AFS-Search-Pro greatly boosts the performance of the original FLUX.1-dev, achieving state-of-the-art
+              results across three different benchmarks. Meanwhile, AFS-Search-Fast also significantly enhances
+              performance while maintaining fast generation speed.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column is-full">
+          <h2 class="title is-3 has-text-centered">Methodology</h2>
+
+          <div class="has-text-centered" style="margin-bottom: 2rem;">
+            <img src="static/images/overview.png" alt="Framework Pipeline" width="100%"
+              style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+            <p class="is-size-7 has-text-grey" style="margin-top: 10px;">
+              <em>Figure 3: The pipeline operates in four phases: Prompt Optimization, Initial Structure Generation,
+                Parallel Rollout Search, and Global Feedback.</em>
+            </p>
+          </div>
+
+          <div class="content">
+            <p>
+              Unlike traditional open-loop sampling where initial semantic ambiguities accumulate irreversibly,
+              <strong>AFS-Search</strong> reformulates text-to-image generation as a navigable, closed-loop
+              decision-making process. The framework tackles spatial grounding through two core components:
+            </p>
+
+            <h3 class="title is-4" style="margin-top: 2rem;">1. Parallel Rollout Search (PRS)</h3>
+            <p>
+              At a critical decision point \( t_{split} \) (e.g., 60% of total steps), a VLM acts as a semantic critic
+              to diagnose defects. Based on this diagnosis, we construct a search tree to explore alternative futures:
+            </p>
+            <ul>
+              <li><strong>Baseline Branch:</strong> Continues the standard ODE trajectory without intervention.</li>
+              <li><strong>Exploration Branch:</strong> Injects controlled Gaussian noise \( \epsilon \sim \mathcal{N}(0,
+                \sigma^2 I) \) to escape local semantic optima and resample global layouts.</li>
+              <li><strong>Corrective Branch:</strong> Activates Agentic Flow Steering (AFS) to actively rectify specific
+                semantic defects.</li>
+            </ul>
+            <p>
+              Each branch undergoes a short-horizon simulation. The VLM critic then evaluates the previews using a
+              multi-dimensional scoring mechanism (Prompt Adherence, Relational Logic, and Visual Integrity) to select
+              the optimal trajectory.
+            </p>
+
+            <h3 class="title is-4" style="margin-top: 2rem;">2. Agentic Flow Steering (AFS)</h3>
+            <p>
+              Instead of passively shifting latent states, AFS functions as an active optimal controller by formulating
+              generative intervention as an energy-minimization problem over the velocity field:
+            </p>
+            <ul>
+              <li>
+                <strong>Linear Trajectory Projection:</strong> Leveraging the approximate constant-velocity property of
+                Rectified Flow, we project the noisy state back to the data manifold to preview the image:
+                <div class="has-text-centered" style="margin: 1.5rem 0; font-size: 1.2rem;">
+                  \( \hat{z}_0 = z_t - t \cdot v_t \)
+                </div>
+              </li>
+              <li>
+                <strong>Contrastive Semantic Energy:</strong> The VLM's diagnosis is operationalized into an energy
+                function via CLIP. This actively repels the trajectory from flawed concepts (\( e_{neg} \)) while
+                pulling it toward the target semantic basin (\( e_{pos} \)):
+                <div class="has-text-centered" style="margin: 1.5rem 0; font-size: 1.2rem;">
+                  \( \mathcal{E}(\hat{z}_0) = \cos(\text{CLIP}(\hat{x}_0), e_{neg}) - \cos(\text{CLIP}(\hat{x}_0),
+                  e_{pos}) \)
+                </div>
+              </li>
+              <li>
+                <strong>Time-Scaled Velocity Modulation:</strong> The energy gradient is projected back to the ODE
+                vector field. Confined by a spatial mask \( M \) from SAM3, the corrected velocity is:
+                <div class="has-text-centered" style="margin: 1.5rem 0; font-size: 1.2rem;">
+                  \( v_t^{corrected} = v_t + \eta t \cdot \nabla_{\hat{z}_0}\mathcal{E} \odot M \)
+                </div>
+              </li>
+            </ul>
+
+            <h3 class="title is-4" style="margin-top: 2rem;">3. Global Feedback Loop</h3>
+            <p>
+              As a final safety mechanism, if the final image score falls below a quality threshold, a <strong>Redesign
+                Loop</strong> is triggered. The VLM analyzes the failure mode, refines the prompt to address specific
+              issues, and restarts the Parallel Rollout Search process, ensuring high reliability for complex queries.
+            </p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section has-background-light">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column is-full">
+          <h2 class="title is-3 has-text-centered">Experiments & Results</h2>
+
+          <div class="content" style="margin-top: 2rem;">
+            <h3 class="title is-4">Qualitative Comparison</h3>
+            <p>
+              Our AFS-Search effectively handles complex prompts, attribute binding, and spatial relationships compared
+              to open-loop baselines.
+            </p>
+            <img src="static/images/experiment_01.png" alt="Visual Comparison on T2I-CompBench" width="100%"
+              style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+          </div>
+
+          <div class="content" style="margin-top: 3rem;">
+            <h3 class="title is-4">Quantitative Results on T2I-CompBench</h3>
+            <p>
+              AFS-Search-Pro greatly boosts the performance of the original FLUX.1-dev, achieving state-of-the-art
+              results across the benchmark. AFS-Search-Fast also significantly enhances performance while maintaining a
+              fast generation speed.
+            </p>
+
+            <div class="table-container">
+              <table class="table is-striped is-hoverable is-fullwidth is-bordered has-text-centered">
+                <thead>
+                  <tr class="has-background-grey-dark">
+                    <th class="has-text-white">Method</th>
+                    <th class="has-text-white">Color ↑</th>
+                    <th class="has-text-white">Shape ↑</th>
+                    <th class="has-text-white">Texture ↑</th>
+                    <th class="has-text-white">Spatial ↑</th>
+                    <th class="has-text-white">Non-Spatial ↑</th>
+                    <th class="has-text-white">Complex ↑</th>
+                    <th class="has-text-white">Average ↑</th>
+                    <th class="has-text-white">Time (s) ↓</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="has-text-left">FLUX.1-dev</td>
+                    <td>0.7736</td>
+                    <td>0.5112</td>
+                    <td>0.6325</td>
+                    <td>0.2747</td>
+                    <td>0.3077</td>
+                    <td>0.3622</td>
+                    <td>0.4770</td>
+                    <td>11.7</td>
+                  </tr>
+                  <tr>
+                    <td class="has-text-left">AgentComp</td>
+                    <td><strong>0.8743</strong></td>
+                    <td>0.6681</td>
+                    <td><strong>0.8142</strong></td>
+                    <td>0.4748</td>
+                    <td>0.3196</td>
+                    <td>0.4261</td>
+                    <td>0.5962</td>
+                    <td>-</td>
+                  </tr>
+                  <tr>
+                    <td class="has-text-left"><strong>AFS-Search-Fast (Ours)</strong></td>
+                    <td>0.8132</td>
+                    <td>0.6121</td>
+                    <td>0.7607</td>
+                    <td>0.5416</td>
+                    <td>0.4832</td>
+                    <td>0.5208</td>
+                    <td>0.6219</td>
+                    <td>32.5</td>
+                  </tr>
+                  <tr class="is-selected">
+                    <td class="has-text-left"><strong>AFS-Search-Pro (Ours)</strong></td>
+                    <td><strong>0.8847</strong></td>
+                    <td>0.6292</td>
+                    <td><strong>0.7609</strong></td>
+                    <td><strong>0.6250</strong></td>
+                    <td><strong>0.5305</strong></td>
+                    <td><strong>0.6185</strong></td>
+                    <td><strong>0.6748</strong></td>
+                    <td>62.3</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="content" style="margin-top: 3rem;">
+            <h3 class="title is-4">Reasoning Capabilities on R2I-Bench</h3>
+            <p>
+              To further explore the reasoning capabilities of our method, we evaluate AFS-Search on the R2I-Bench. Our
+              agentic framework helps the original FLUX.1-dev think and react across the whole pipeline, significantly
+              improving reasoning capabilities due to the VLM integration.
+            </p>
+
+            <img src="static/images/R2I_01.png" alt="Visual Comparison on R2I-Bench" width="100%"
+              style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+            <p class="has-text-centered is-size-7 has-text-grey" style="margin-top: 10px;">
+              <em>Visual comparison of R2I-Bench experiment showing enhanced reasoning capabilities.</em>
+            </p>
+
+            <div class="table-container" style="margin-top: 2rem;">
+              <table class="table is-striped is-hoverable is-fullwidth is-bordered has-text-centered">
+                <thead>
+                  <tr class="has-background-grey-dark">
+                    <th class="has-text-white">Method</th>
+                    <th class="has-text-white">Causal</th>
+                    <th class="has-text-white">Logical</th>
+                    <th class="has-text-white">Commonsense</th>
+                    <th class="has-text-white">Compositional</th>
+                    <th class="has-text-white">Mathematical</th>
+                    <th class="has-text-white">Average</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="has-text-left">Lumina-Image 2.0</td>
+                    <td>0.40</td>
+                    <td>0.56</td>
+                    <td>0.49</td>
+                    <td>0.65</td>
+                    <td>0.13</td>
+                    <td>0.45</td>
+                  </tr>
+                  <tr>
+                    <td class="has-text-left">EMU3</td>
+                    <td>0.41</td>
+                    <td><strong>0.61</strong></td>
+                    <td>0.44</td>
+                    <td>0.62</td>
+                    <td>0.09</td>
+                    <td>0.43</td>
+                  </tr>
+                  <tr>
+                    <td class="has-text-left">FLUX.1-dev</td>
+                    <td><strong>0.35</strong></td>
+                    <td>0.37</td>
+                    <td>0.39</td>
+                    <td>0.48</td>
+                    <td>0.05</td>
+                    <td>0.33</td>
+                  </tr>
+                  <tr class="is-selected">
+                    <td class="has-text-left"><strong>AFS-Search (ours)</strong></td>
+                    <td><strong>0.45</strong></td>
+                    <td>0.58</td>
+                    <td><strong>0.51</strong></td>
+                    <td>0.66</td>
+                    <td><strong>0.20</strong></td>
+                    <td><strong>0.48</strong></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="columns is-multiline is-centered" style="margin-top: 2rem;">
+            <div class="column is-full">
+              <h3 class="title is-5 has-text-centered">GenEval Benchmark</h3>
+              <img src="static/images/GenEval_01.png" alt="GenEval Benchmark Results" width="100%"
+                style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+            </div>
+            <div class="column is-full">
+              <h3 class="title is-5 has-text-centered">Ablation Study 1</h3>
+              <img src="static/images/ablation_01.png" alt="Ablation Study Visuals" width="100%"
+                style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+            </div>
+            <div class="column is-full" style="margin-top: 1rem;">
+              <h3 class="title is-5 has-text-centered">Ablation Study 2</h3>
+              <img src="static/images/extra_01.png" alt="Ablation Study Visuals" width="100%"
+                style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="BibTeX">
+    <div class="container is-max-desktop content">
+      <h2 class="title">BibTeX</h2>
+      <pre><code>@inproceedings{afs_search_2026,
+  author    = {Ping Chen, Daoxuan Zhang, Xiangming Wang, Yungeng Liu, Haijin Zeng, Yongyong Chen},
+  title     = {Agentic Flow Steering and Parallel Rollout Search for Spatially Grounded Text-to-Image Generation},
+  year      = {2026},
+}</code></pre>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="content has-text-centered">
+        <p>
+          Website template adapted from <a href="https://github.com/nerfies/nerfies.github.io">Nerfies</a>.
+        </p>
+      </div>
+    </div>
+  </footer>
+
+</body>
+
+</html>
